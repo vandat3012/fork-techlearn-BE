@@ -15,6 +15,7 @@ import com.techzen.techlearn.repository.*;
 import com.techzen.techlearn.service.MailService;
 import com.techzen.techlearn.service.StudentCalendarService;
 import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -47,32 +48,37 @@ public class StudentCalendarServiceImpl implements StudentCalendarService {
         return mentorRepository.existsById(id);
     }
 
+    @Transactional
     @Override
     public TeacherCalendarResponseDTO2 addStudentCalendar(TeacherCalendarRequestDTO2 request) throws MessagingException, IOException {
+        TeacherCalendar calendar = teacherCalendarMapper.toEntity(request);
 
-       TeacherCalendar calendar = teacherCalendarMapper.toEntity(request);
+        UUID ownerId = UUID.fromString(request.getOwnerId());
+        Teacher teacher;
+        Mentor mentor;
 
-       UUID ownerId = UUID.fromString(request.getOwnerId());
-       Teacher teacher;
-       Mentor mentor;
-
-       if(isTeacher(ownerId)) {
-           teacher = teacherRepository.findById(ownerId).orElseThrow(
-                   () -> new AppException(ErrorCode.TEACHER_NOT_EXISTED)
-           );
-           calendar.setTeacher(teacher);
-         } else if(isMentor(ownerId)) {
-           mentor = mentorRepository.findById(ownerId).orElseThrow(
-                   () -> new AppException(ErrorCode.MENTOR_NOT_EXISTED)
-           );
-           calendar.setMentor(mentor);
+        if (isTeacher(ownerId)) {
+            teacher = teacherRepository.findById(ownerId).orElseThrow(
+                    () -> new AppException(ErrorCode.TEACHER_NOT_EXISTED)
+            );
+            calendar.setTeacher(teacher);
+        } else if (isMentor(ownerId)) {
+            mentor = mentorRepository.findById(ownerId).orElseThrow(
+                    () -> new AppException(ErrorCode.MENTOR_NOT_EXISTED)
+            );
+            calendar.setMentor(mentor);
         }
 
         UserEntity user = userRepository.findUserById(UUID.fromString(request.getUserId())).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
 
+        if (user.getPoints() <= 0) {
+            throw new AppException(ErrorCode.POINTS_NOT_ENOUGH);
+        }
+
         calendar.setStatus(CalendarStatus.BOOKED);
+        user.setPoints(user.getPoints() - 1);
         calendar.setUser(user);
 
 //        CalendarDTO calendarDTO = CalendarDTO.builder()
@@ -102,6 +108,25 @@ public class StudentCalendarServiceImpl implements StudentCalendarService {
         return calendars.stream()
                 .map(teacherCalendarMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public Integer cancelBooking(Integer bookingId) {
+        TeacherCalendar teacherCalendar = teacherCalendarRepository.findById(bookingId).orElseThrow(
+                ()-> new AppException(ErrorCode.CALENDAR_NOT_EXISTED)
+        );
+        if (teacherCalendar.getStatus().equals(CalendarStatus.BOOKED)){
+            teacherCalendar.setStatus(CalendarStatus.CANCELLED);
+            studentCalendarRepository.save(teacherCalendar);
+            UserEntity user = teacherCalendar.getUser();
+            user.setPoints(user.getPoints() + 1);
+            userRepository.save(user);
+            return user.getPoints();
+        }else {
+            throw new AppException(ErrorCode.CALENDAR_NOT_EXISTED);
+        }
+
     }
 
 }

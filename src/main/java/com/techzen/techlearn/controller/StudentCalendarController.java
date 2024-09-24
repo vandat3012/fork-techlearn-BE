@@ -6,6 +6,7 @@ import com.techzen.techlearn.dto.response.TeacherCalendarResponseDTO2;
 import com.techzen.techlearn.enums.ErrorCode;
 import com.techzen.techlearn.service.StudentCalendarService;
 import com.techzen.techlearn.service.TeacherCalendar2Service;
+import com.techzen.techlearn.service.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -28,6 +30,7 @@ public class StudentCalendarController {
 
     StudentCalendarService studentCalendarService;
     TeacherCalendar2Service teacherCalendarService;
+    UserService userService;
 
     @GetMapping("/{id}/calendar/")
     public List<TeacherCalendarResponseDTO2> getSchedule(@RequestParam("StartDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
@@ -80,6 +83,17 @@ public class StudentCalendarController {
                 .code(ErrorCode.GET_SUCCESSFUL.getCode())
                 .message(ErrorCode.GET_SUCCESSFUL.getMessage())
                 .result(studentCalendarService.getStudentCalendarsByUserId(id))
+                .build();
+    }
+
+    @PreAuthorize("hasAuthority('TEACHER')")
+    @PostMapping("/cancelBooking/{idBooking}")
+    public ResponseData<?> cancelBooking (@PathVariable Integer idBooking) {
+        return ResponseData.builder()
+                .status(HttpStatus.OK.value())
+                .code(ErrorCode.GET_SUCCESSFUL.getCode())
+                .message(ErrorCode.GET_SUCCESSFUL.getMessage())
+                .result(studentCalendarService.cancelBooking(idBooking))
                 .build();
     }
 }
