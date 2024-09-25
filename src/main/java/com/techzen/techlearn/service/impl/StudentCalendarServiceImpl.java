@@ -134,6 +134,9 @@ public class StudentCalendarServiceImpl implements StudentCalendarService {
                 () -> new AppException(ErrorCode.CALENDAR_NOT_EXISTED)
         );
         calendar.setStatus(CalendarStatus.CANCELLED);
+        UserEntity user = calendar.getUser();
+        user.setPoints(user.getPoints() + 1);
+        userRepository.save(user);
         return teacherCalendarMapper.toDTO(studentCalendarRepository.save(calendar));
     }
 
@@ -147,23 +150,5 @@ public class StudentCalendarServiceImpl implements StudentCalendarService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    @Override
-    public Integer cancelBooking(Integer bookingId) {
-        TeacherCalendar teacherCalendar = teacherCalendarRepository.findById(bookingId).orElseThrow(
-                ()-> new AppException(ErrorCode.CALENDAR_NOT_EXISTED)
-        );
-        if (teacherCalendar.getStatus().equals(CalendarStatus.BOOKED)){
-            teacherCalendar.setStatus(CalendarStatus.CANCELLED);
-            studentCalendarRepository.save(teacherCalendar);
-            UserEntity user = teacherCalendar.getUser();
-            user.setPoints(user.getPoints() + 1);
-            userRepository.save(user);
-            return user.getPoints();
-        }else {
-            throw new AppException(ErrorCode.CALENDAR_NOT_EXISTED);
-        }
-
-    }
 
 }

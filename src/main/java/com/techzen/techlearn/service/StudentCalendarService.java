@@ -15,6 +15,4 @@ public interface StudentCalendarService {
     TeacherCalendarResponseDTO2 cancelCalendarStudentById(Integer id);
 
     List<TeacherCalendarResponseDTO2> getStudentCalendarsByUserId(UUID id);
-
-    Integer cancelBooking (Integer bookingId);
 }

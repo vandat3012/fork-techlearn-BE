@@ -138,12 +138,18 @@ public class TeacherCalendarServiceImpl implements TeacherCalendar2Service {
                     .orElseThrow(() -> new AppException(ErrorCode.CALENDAR_NOT_EXISTED));
 
             calendar.setStatus(CalendarStatus.CANCELLED);
+            UserEntity user = calendar.getUser();
+            user.setPoints(user.getPoints() + 1);
+            userRepository.save(user);
             teacherCalendarRepository.save(calendar);
         } else if (mentor != null) {
             calendar = teacherCalendarRepository.findByIdAndMentor(id, mentor)
                     .orElseThrow(() -> new AppException(ErrorCode.CALENDAR_NOT_EXISTED));
 
             calendar.setStatus(CalendarStatus.CANCELLED);
+            UserEntity user = calendar.getUser();
+            user.setPoints(user.getPoints() + 1);
+            userRepository.save(user);
             teacherCalendarRepository.save(calendar);
         }
     }

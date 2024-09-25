@@ -69,14 +69,4 @@ public class StudentCalendarController {
                 .result(studentCalendarService.getStudentCalendarsByUserId(id))
                 .build();
     }
-    @PreAuthorize("hasAuthority('TEACHER') or hasAuthority('USER')")
-    @PostMapping("/cancelBooking/{idBooking}")
-    public ResponseData<?> cancelBooking (@PathVariable Integer idBooking) {
-        return ResponseData.builder()
-                .status(HttpStatus.OK.value())
-                .code(ErrorCode.GET_SUCCESSFUL.getCode())
-                .message(ErrorCode.GET_SUCCESSFUL.getMessage())
-                .result(studentCalendarService.cancelBooking(idBooking))
-                .build();
-    }
 }
