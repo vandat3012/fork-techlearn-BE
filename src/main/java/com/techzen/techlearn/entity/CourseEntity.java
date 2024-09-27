@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Where;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +35,9 @@ public class CourseEntity extends BaseEntity{
     @Column(name = "time")
     private String time;
 
+    @Column(name = "points")
+    private Integer points;
+
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
@@ -48,4 +50,8 @@ public class CourseEntity extends BaseEntity{
     @JoinTable(name = "tbl_user_course", joinColumns = @JoinColumn(name = "id_course"),
             inverseJoinColumns = @JoinColumn(name = "id_user"))
     List<UserEntity> userEntities = new ArrayList<>();
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "courses")
+    List<Teacher> teachers = new ArrayList<>();
 }

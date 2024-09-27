@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Where;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -28,5 +30,9 @@ public class ReviewConfigEntity extends BaseEntity{
 
     @Column(name = "is_active")
     private Boolean isActive;
+
+
+
+
 }
 

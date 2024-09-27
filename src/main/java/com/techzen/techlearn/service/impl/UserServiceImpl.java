@@ -2,11 +2,15 @@ package com.techzen.techlearn.service.impl;
 
 import com.techzen.techlearn.dto.request.UserRequestDTO;
 import com.techzen.techlearn.dto.response.PageResponse;
+import com.techzen.techlearn.dto.response.StudentCourseResponseDTO;
 import com.techzen.techlearn.dto.response.UserResponseDTO;
+import com.techzen.techlearn.entity.Role;
 import com.techzen.techlearn.entity.UserEntity;
 import com.techzen.techlearn.enums.ErrorCode;
+import com.techzen.techlearn.enums.RoleType;
 import com.techzen.techlearn.exception.AppException;
 import com.techzen.techlearn.mapper.UserMapper;
+import com.techzen.techlearn.repository.RoleRepository;
 import com.techzen.techlearn.repository.UserRepository;
 import com.techzen.techlearn.service.UserService;
 import lombok.AccessLevel;
@@ -15,6 +19,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,10 +33,17 @@ public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
     UserMapper userMapper;
+    RoleRepository roleRepository;
 
     @Override
     public UserResponseDTO getUserById(UUID id) {
         UserEntity user = userRepository.findUserById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return userMapper.toUserResponseDTO(user);
+    }
+
+    @Override
+    public UserResponseDTO getUserEntityByAccessToken(String accessToken) {
+        UserEntity user = userRepository.findUserEntityByAccessToken(accessToken).orElseThrow(()-> new AppException(ErrorCode.INVALID_TOKEN));
         return userMapper.toUserResponseDTO(user);
     }
 
@@ -71,5 +83,60 @@ public class UserServiceImpl implements UserService {
                 .totalPage(users.getTotalPages())
                 .items(list)
                 .build();
+    }
+
+    @Override
+    public UserResponseDTO addRole(UUID uniqueId, List<RoleType> roleTypes) {
+        UserEntity user = userRepository.findById(uniqueId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        roleTypes.forEach(roleType -> {
+            Role role = roleRepository.findByName(roleType)
+                    .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+            if (!user.getRoles().contains(role)) {
+                user.getRoles().add(role);
+            }
+        });
+
+        return userMapper.toUserResponseDTO(userRepository.save(user));
+    }
+
+    @Override
+    public UserResponseDTO retrieveUser() {
+       var context = SecurityContextHolder.getContext();
+       String email = context.getAuthentication().getName();
+
+       UserEntity user = userRepository.findByEmail(email)
+               .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+       return userMapper.toUserResponseDTO(user);
+    }
+
+    @Override
+        public StudentCourseResponseDTO getAllPointsById(UUID idUser) {
+            Integer totalPoints = userRepository.getAllPointsById(idUser);
+            UserEntity entity = new UserEntity();
+            entity.setPoints(totalPoints);
+            StudentCourseResponseDTO dto = userMapper.toStudentCourseResponseDTO(entity);
+
+            return StudentCourseResponseDTO.builder()
+                    .points(dto.getPoints())
+                    .build();
+    }
+
+    @Override
+    public UserResponseDTO removeRoles(UUID id, List<RoleType> roles) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        roles.forEach(roleType -> {
+            Role role = roleRepository.findByName(roleType)
+                    .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+            if (user.getRoles().contains(role)) {
+                user.getRoles().remove(role);
+            }
+        });
+
+        return userMapper.toUserResponseDTO(userRepository.save(user));
     }
 }

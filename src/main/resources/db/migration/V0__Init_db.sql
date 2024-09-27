@@ -1,5 +1,7 @@
 CREATE DATABASE IF NOT EXISTS techlearn;
 
+USE techlearn;
+
 CREATE TABLE tbl_assignment
 (
     id            BIGINT AUTO_INCREMENT NOT NULL,
@@ -23,17 +25,17 @@ CREATE TABLE tbl_assignment_user
 
 CREATE TABLE tbl_chapter
 (
-    id            BIGINT AUTO_INCREMENT NOT NULL,
-    created_by    VARCHAR(255) NULL,
-    created_date  datetime NULL,
-    modified_date datetime NULL,
-    modified_by   VARCHAR(255) NULL,
-    title         VARCHAR(255) NULL,
-    `description` MEDIUMTEXT NULL,
-    position      INT NULL,
-    course_id     BIGINT NULL,
-    is_deleted    BIT(1) NULL,
-    CONSTRAINT pk_tbl_chapter PRIMARY KEY (id)
+  id BIGINT AUTO_INCREMENT NOT NULL,
+  created_by VARCHAR(255) NULL,
+  created_date datetime NULL,
+  modified_date datetime NULL,
+  modified_by VARCHAR(255) NULL,
+  title VARCHAR(255) NULL,
+  `description` MEDIUMTEXT NULL,
+  position INT NULL,
+  course_id BIGINT NULL,
+  is_deleted BIT(1) NULL,
+  CONSTRAINT pk_tbl_chapter PRIMARY KEY (id)
 );
 
 CREATE TABLE tbl_course
