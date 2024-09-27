@@ -45,16 +45,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    @ExceptionHandler(value = RuntimeException.class)
-    ResponseEntity<ResponseData> handlingRuntimeException(WebRequest request) {
-        ResponseData error = new ResponseData();
-        response(request, error);
-        error.setError("PathVariable Invalid");
-        error.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
-        error.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-    }
-
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ResponseData> handlingAccessDeniedException(AccessDeniedException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
@@ -63,6 +53,16 @@ public class GlobalExceptionHandler {
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage())
                         .build());
+    }
+
+    @ExceptionHandler(value = RuntimeException.class)
+    ResponseEntity<ResponseData> handlingRuntimeException(WebRequest request) {
+        ResponseData error = new ResponseData();
+        response(request, error);
+        error.setError("PathVariable Invalid");
+        error.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
+        error.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     private void response(WebRequest request, ResponseData error) {

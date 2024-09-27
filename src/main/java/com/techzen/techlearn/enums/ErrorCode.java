@@ -22,7 +22,7 @@ public enum ErrorCode {
     UPDATE_SUCCESSFUL(1013, "Update successful", HttpStatus.OK),
     INVALID_DATA(1014, "Invalid data", HttpStatus.BAD_REQUEST),
     REVIEW_NOT_FOUND(1020, "Review not found", HttpStatus.BAD_REQUEST),
-
+    FORBIDDEN_ERROR(1121, "You don't have permission to access this resource!", HttpStatus.FORBIDDEN),
     // user code user : 110*
     USER_EXISTED(1101, "User existed", HttpStatus.BAD_REQUEST),
     USERNAME_INVALID(1102, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
@@ -31,6 +31,9 @@ public enum ErrorCode {
     FULL_NAME_INVALID(1105, "Full name must be not blank", HttpStatus.BAD_REQUEST),
     AGE_INVALID(1106, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1107, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
+    INVALID_CREDENTIALS(1108, "Invalid credentials", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_FOUND(1109, "Role not found", HttpStatus.BAD_REQUEST),
+    INVALID_TOKEN(1110, "Invalid access token", HttpStatus.BAD_REQUEST),
 
 
     // prompt code prompt : 120*
@@ -50,7 +53,8 @@ public enum ErrorCode {
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
 
     // error code Teacher : 150*
-    TEACHER_NOT_EXISTED(1015, "Teacher not existed", HttpStatus.NOT_FOUND),
+    TEACHER_NOT_EXISTED(1505, "Teacher not existed", HttpStatus.NOT_FOUND),
+    MENTOR_NOT_EXISTED(1506, "Mentor not existed", HttpStatus.NOT_FOUND),
 
     // error code calendar : 160*
     TIME_NOT_SUITABLE(1016, "time start must time end equals ten minutes", HttpStatus.NOT_FOUND),
@@ -59,7 +63,17 @@ public enum ErrorCode {
     DATE_APPOINTMENT_NOT_SUITABLE(1019, "This smaller set date is now", HttpStatus.BAD_REQUEST),
     TIME_START_SUITABLE(1020, "This smaller set time is now", HttpStatus.BAD_REQUEST),
     CALENDAR_NOT_EXISTED(1021, "Calendar not existed", HttpStatus.NOT_FOUND),
-    ;
+
+    //error code chapter
+    CHAPTER_NOT_EXISTED(1898, "Chapter not existed", HttpStatus.NOT_FOUND),
+    POINTS_NOT_ENOUGH(1022, "Points not enough", HttpStatus.BAD_REQUEST),
+
+    CANNOT_SEND_EMAIL(1023, "Cannot send email", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    // error code StructResponseAI : 170*
+    STRUCT_RESPONSE_NOT_EXISTED(1701, "StructResponseAI not found", HttpStatus.NOT_FOUND),
+    TYPE_STRUCT_RESPONSE_NOT_EXISTED(1702, "Type StructResponseAI not found", HttpStatus.NOT_FOUND),
+    CONTENT_STRUCT_RESPONSE_NOT_NULL(1703, "Type StructResponseAI not found", HttpStatus.NOT_FOUND);
 
     Integer code;
     String message;

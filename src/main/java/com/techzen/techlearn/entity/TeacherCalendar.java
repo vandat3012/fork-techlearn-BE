@@ -1,5 +1,6 @@
 package com.techzen.techlearn.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.techzen.techlearn.enums.CalendarStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,20 +46,21 @@ public class TeacherCalendar extends BaseEntity{
     private String endTimezone;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "teacher_id", referencedColumnName = "id")
     private Teacher teacher;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "mentor_id", referencedColumnName = "id")
+    private Mentor mentor;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private CalendarStatus status;
 
-    @Column(name = "course_id")
-    private long courseId;
-
-    @Column(name = "chapter_id")
-    private long chapterId;
-
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private UserEntity user;
 }

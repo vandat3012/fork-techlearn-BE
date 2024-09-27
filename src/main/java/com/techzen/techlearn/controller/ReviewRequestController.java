@@ -29,6 +29,15 @@ public class ReviewRequestController {
                 .result(reviewConfigService.getAllReviewConfig(page, pageSize))
                 .build();
     }
+    @GetMapping("active")
+    public ResponseData<?> getByActive() {
+        return ResponseData.builder()
+                .status(HttpStatus.OK.value())
+                .code(ErrorCode.GET_SUCCESSFUL.getCode())
+                .message(ErrorCode.GET_SUCCESSFUL.getMessage())
+                .result(reviewConfigService.getByActive())
+                .build();
+    }
 
     @PostMapping
     public ResponseData<?> addConfig(@RequestBody @Valid ReviewConfigRequestDTO config) {

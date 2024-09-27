@@ -15,7 +15,6 @@ import java.util.UUID;
 public class Teacher extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
@@ -27,9 +26,16 @@ public class Teacher extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String avatar;
 
+    @Column(name = "email")
+    private String email;
+
     @OneToMany(mappedBy = "teacher")
     private List<TeacherCalendar> teacherCalendars;
 
-    @OneToMany(mappedBy = "teacher")
-    private List<TechnicalTeacher> technicalTeachers;
+    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JoinTable(name = "teacher_course",
+            joinColumns=@JoinColumn(name="teacher_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name="course_id", referencedColumnName = "id")
+    )
+    private List<CourseEntity> courses;
 }
