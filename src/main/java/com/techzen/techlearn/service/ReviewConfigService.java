@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 @Service
 public interface ReviewConfigService {
 
+    public ReviewConfigResponseDTO getByActive();
+
     ReviewConfigResponseDTO saveConfig(ReviewConfigRequestDTO config);
 
     ReviewConfigResponseDTO updateConfig(Long id, ReviewConfigRequestDTO config);

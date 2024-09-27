@@ -8,6 +8,7 @@ import com.techzen.techlearn.exception.AppException;
 import com.techzen.techlearn.repository.TeacherRepository;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.UUID;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @Mapper(componentModel = "spring")
 public interface TeacherMapper {
 
+    @Mapping(target = "email", source = "email")
     Teacher toTeacherEntity(TeacherRequestDTO dto);
 
     TeacherResponseDTO toTeacherResponseDTO(Teacher entity);

@@ -19,6 +19,7 @@ public class ChatGPTAPIService implements AIService {
 
     @Override
     public String callAPI(String mess) throws IOException, InterruptedException {
+        System.out.println(mess);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.openai.com/v1/chat/completions"))
                 .header("Authorization", "Bearer " + Dotenv.load().get("CHATGPT_API_KEY"))
