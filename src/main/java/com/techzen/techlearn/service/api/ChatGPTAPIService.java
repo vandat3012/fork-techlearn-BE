@@ -25,7 +25,7 @@ public class ChatGPTAPIService implements AIService {
                 .header("Authorization", "Bearer " + Dotenv.load().get("CHATGPT_API_KEY"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(
-                        "{\"model\": \"gpt-4o-mini\","
+                        "{\"model\": \"gpt-4o\","
                                 + "\"messages\": [{\"role\": \"user\", \"content\": \"" + mess + "\"}],"
                                 + "\"temperature\": 0.7}"
                 ))

@@ -52,15 +52,12 @@ public class GithubServiceImpl implements GithubService {
     public String reviewResponse(GithubResquestDTO resquestDTO) throws Exception {
         var content = getContent(resquestDTO.getGithub_link());
         ObjectMapper mapper = new ObjectMapper();
-//        System.out.println(mapper.writeValueAsString(content).replace("\"", "'"));
         String jsonString = mapper.writeValueAsString(content).replace("\"", "'");
         jsonString = jsonString.replace("{x}", "\\\"");
-//        System.out.println(jsonString);
         var description = reviewConfigRepository.findByActive().getPromptStructure();
         List<StructResponseAIDTO> listStruct  = structResponseService.getAll();
         String request = description.replace("{exercise}",resquestDTO.getExerciseTitle()) + jsonString;
         int sizeLoop = listStruct.size();
-
 
         for (int index = 0; index < sizeLoop; index++) {
             if (listStruct.get(index).getType().equals("language") && listStruct.get(index).getIsActive()) {
@@ -76,13 +73,10 @@ public class GithubServiceImpl implements GithubService {
 
         }
 
-
-        System.out.println("alooo :"+request);
         var response = AIService.callAPI(request.replace("\n","").trim());
         submitionService.addSubmit(resquestDTO.getGithub_link(), response, resquestDTO.getIdUser(), resquestDTO.getIdAssignment());
         return response;
     }
-
 
     private List<GithubResponseDTO> getContent(String linkGithub) {
         return getContentRecursive(linkGithub, new ArrayList<>());
