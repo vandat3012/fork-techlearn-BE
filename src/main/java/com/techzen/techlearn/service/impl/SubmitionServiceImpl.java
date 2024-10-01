@@ -3,13 +3,11 @@ package com.techzen.techlearn.service.impl;
 import com.techzen.techlearn.dto.response.PageResponse;
 import com.techzen.techlearn.dto.response.ReviewResponseDTO;
 import com.techzen.techlearn.dto.response.SubmittionResponseDTO;
-import com.techzen.techlearn.entity.AssignmentEntity;
 import com.techzen.techlearn.entity.SubmitionEntity;
 import com.techzen.techlearn.entity.UserEntity;
 import com.techzen.techlearn.enums.SubmitStatus;
 import com.techzen.techlearn.mapper.ReviewMapper;
 import com.techzen.techlearn.mapper.SubmittionMapper;
-import com.techzen.techlearn.repository.AssignmentRepository;
 import com.techzen.techlearn.repository.SubmitionRepository;
 import com.techzen.techlearn.repository.UserRepository;
 import com.techzen.techlearn.service.SubmitionService;
@@ -22,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,7 +30,6 @@ public class SubmitionServiceImpl implements SubmitionService {
 
     SubmitionRepository submitionRepository;
     UserRepository userRepository;
-    AssignmentRepository assignmentRepository;
     ReviewMapper reviewMapper;
     SubmittionMapper submittionMapper;
 
@@ -42,27 +38,14 @@ public class SubmitionServiceImpl implements SubmitionService {
         UserEntity userEntity = userRepository.findUserById(
                         UUID.fromString(id))
                 .orElseThrow(() -> new RuntimeException("User Not Found"));
-        AssignmentEntity assignment = assignmentRepository.findById(Long.valueOf(idAss))
-                .orElseThrow(() -> new RuntimeException("Assignment Not Found"));
-        var submition = SubmitionEntity.builder()
+        var submit = SubmitionEntity.builder()
                 .linkGithub(linkGithub)
                 .review(resultReview)
                 .user(userEntity)
                 .isDeleted(false)
-                .assignment(assignment)
+                .assignmentId(Long.parseLong(idAss))
                 .build();
-        if (resultReview.contains("Pass")) {
-            assignment.setStatus(SubmitStatus.PASS);
-            submition.setStatus(SubmitStatus.PASS);
-        } else if (resultReview.contains("Fail")) {
-            assignment.setStatus(SubmitStatus.FIX_REVIEW);
-            submition.setStatus(SubmitStatus.FIX_REVIEW);
-        } else {
-            assignment.setStatus(SubmitStatus.PENDING);
-            submition.setStatus(SubmitStatus.PENDING);
-        }
-        submitionRepository.save(submition);
-        assignmentRepository.save(assignment);
+        submitionRepository.save(submit);
     }
 
     @Override
@@ -95,7 +78,7 @@ public class SubmitionServiceImpl implements SubmitionService {
                 .findAllByUserIdAndStatus(pageable, userId, submitStatus);
         if (assignmentId != null) {
             list = reviews.stream()
-                    .filter(c -> c.getAssignment().getId() == assignmentId)
+                    .filter(c -> c.getAssignmentId().equals(assignmentId))
                     .map(submittionMapper::toSubmittionResponseDTO)
                     .collect(Collectors.toList());
         } else {

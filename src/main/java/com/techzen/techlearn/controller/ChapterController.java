@@ -1,35 +1,27 @@
 package com.techzen.techlearn.controller;
 
-import com.techzen.techlearn.dto.response.ResponseData;
-import com.techzen.techlearn.enums.ErrorCode;
-import com.techzen.techlearn.service.CourseService;
+import com.techzen.techlearn.service.ChapterService;
+import com.techzen.techlearn.util.JsonResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/api/v1/chapters")
 public class ChapterController {
-    CourseService courseService;
+
+    ChapterService chapterService;
+
     @GetMapping
-    public ResponseData<?> getChapterByIdCourse(@RequestParam Long idCourse){
-
-        return ResponseData.builder()
-                .status(HttpStatus.OK.value())
-                .code(ErrorCode.GET_SUCCESSFUL.getCode())
-                .message(ErrorCode.GET_SUCCESSFUL.getMessage())
-                .result(courseService.findById(idCourse))
-                .build();
-
+    public ResponseEntity<?> getChapterByIdCourse(@RequestParam Long idCourse) {
+        return JsonResponse.ok(chapterService.getAllChaptersByCourseId(idCourse));
     }
 
 }
