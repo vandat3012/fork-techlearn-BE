@@ -33,9 +33,8 @@ public class SubmitionEntity extends BaseEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @ManyToOne()
-    @JoinColumn(name = "assignment_id")
-    private AssignmentEntity assignment;
+    @Column(name = "assignment_id")
+    private Long assignmentId;
 
     @Column(name = "is_deleted")
     private Boolean isDeleted;

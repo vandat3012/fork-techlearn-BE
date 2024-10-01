@@ -38,3 +38,4 @@ application:
       expiration: 86400000 # 1 day
       refresh-token:
         expiration: 604800000 # 7 days
+  urlClient: http://localhost:8282/api/v1

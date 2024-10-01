@@ -37,6 +37,7 @@ public class FlywayConfig {
                 .locations(flywayLocations)
                 .baselineOnMigrate(true)
                 .load();
+        flyway.repair();
         flyway.migrate();
         return flyway;
     }
