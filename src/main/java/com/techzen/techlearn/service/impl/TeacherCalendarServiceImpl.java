@@ -58,7 +58,7 @@ public class TeacherCalendarServiceImpl implements TeacherCalendar2Service {
         LocalDate dateStart = LocalDate.parse(request.getStartTime().substring(0, 10));
         LocalDate dateEnd = LocalDate.parse(request.getEndTime().substring(0, 10));
 
-        if(dateStart.isBefore(LocalDate.now()) || dateEnd.isBefore(LocalDate.now())) {
+        if (dateStart.isBefore(LocalDate.now()) || dateEnd.isBefore(LocalDate.now())) {
             throw new AppException(ErrorCode.DATE_APPOINTMENT_NOT_SUITABLE);
         }
 
@@ -67,7 +67,7 @@ public class TeacherCalendarServiceImpl implements TeacherCalendar2Service {
         Teacher teacher;
         Mentor mentor;
 
-        if(isTeacher(id)) {
+        if (isTeacher(id)) {
             teacher = teacherRepository.findById(id)
                     .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
             entity.setTeacher(teacher);
@@ -96,7 +96,7 @@ public class TeacherCalendarServiceImpl implements TeacherCalendar2Service {
         List<TeacherCalendar> entities = null;
         List<CalendarStatus> statuses = Arrays.asList(CalendarStatus.BUSY, CalendarStatus.BOOKED);
 
-        if(isTeacher(id)) {
+        if (isTeacher(id)) {
             teacher = teacherRepository.findById(id)
                     .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
             entities = teacherCalendarRepository.findByStartTimeGreaterThanEqualAndEndTimeLessThanEqualAndTeacherAndStatusIn(startDate, endDate, teacher, statuses);
@@ -148,23 +148,25 @@ public class TeacherCalendarServiceImpl implements TeacherCalendar2Service {
         }
 
         UserEntity user = calendar.getUser();
-        user.setPoints(user.getPoints() + 1);
-        userRepository.save(user);
+        if (user != null) {
+            user.setPoints(user.getPoints() + 1);
+            userRepository.save(user);
 
-        try {
-            mailService.sendEmails(
-                    new ArrayList<>(Collections.singletonList(user.getEmail())),
-                    "Lịch hẹn đã bị hủy",
-                    calendar.getTitle(),
-                    calendar.getDescription(),
-                    calendar.getStartTime(),
-                    calendar.getEndTime(),
-                    calendar.getDescription(),
-                    "Chi tiết",
-                    "#e74c3c"  // Màu đỏ
-            );
-        } catch (MessagingException e) {
-            throw new AppException(ErrorCode.CANNOT_SEND_EMAIL);
+            try {
+                mailService.sendEmails(
+                        new ArrayList<>(Collections.singletonList(user.getEmail())),
+                        "Lịch hẹn đã bị hủy",
+                        calendar.getTitle(),
+                        calendar.getDescription(),
+                        calendar.getStartTime(),
+                        calendar.getEndTime(),
+                        calendar.getDescription(),
+                        "Chi tiết",
+                        "#e74c3c"  // Màu đỏ
+                );
+            } catch (MessagingException e) {
+                throw new AppException(ErrorCode.CANNOT_SEND_EMAIL);
+            }
         }
     }
 

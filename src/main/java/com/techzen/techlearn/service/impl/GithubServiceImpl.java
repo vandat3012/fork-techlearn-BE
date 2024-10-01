@@ -56,7 +56,8 @@ public class GithubServiceImpl implements GithubService {
         jsonString = jsonString.replace("{x}", "\\\"");
         var description = reviewConfigRepository.findByActive().getPromptStructure();
         List<StructResponseAIDTO> listStruct  = structResponseService.getAll();
-        String request = description.replace("{exercise}",resquestDTO.getExerciseTitle()) + jsonString;
+        String request = description.replace("{exercise}",resquestDTO.getExerciseTitle()
+                .replace("\"", "'")) + jsonString;
         int sizeLoop = listStruct.size();
 
         for (int index = 0; index < sizeLoop; index++) {
@@ -65,7 +66,8 @@ public class GithubServiceImpl implements GithubService {
             }
 
             if(listStruct.get(index).getType().equals("struct") && listStruct.get(index).getIsActive()){
-                request = request.replace("{struct}"," "+ listStruct.get(index).getContentStruct().trim()  + ", {struct}");
+                request = request.replace("{struct}"," "+ listStruct.get(index)
+                        .getContentStruct().trim()  + ", {struct}");
             }
             if(index == sizeLoop-1){
                 request = request.replace("{struct}", "");
@@ -74,7 +76,8 @@ public class GithubServiceImpl implements GithubService {
         }
 
         var response = AIService.callAPI(request.replace("\n","").trim());
-        submitionService.addSubmit(resquestDTO.getGithub_link(), response, resquestDTO.getIdUser(), resquestDTO.getIdAssignment());
+        submitionService.addSubmit(resquestDTO.getGithub_link(), response,
+                resquestDTO.getIdUser(), resquestDTO.getIdAssignment());
         return response;
     }
 

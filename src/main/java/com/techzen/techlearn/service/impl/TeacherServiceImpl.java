@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TeacherServiceImpl implements TeacherService {
 
-//    TeacherEntityRepository teacherRepository;
     TeacherRepository teacherRepository;
     TeacherMapper teacherMapper;
     CourseRepository courseRepository;
