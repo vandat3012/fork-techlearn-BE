@@ -73,7 +73,10 @@ public enum ErrorCode {
     // error code StructResponseAI : 170*
     STRUCT_RESPONSE_NOT_EXISTED(1701, "StructResponseAI not found", HttpStatus.NOT_FOUND),
     TYPE_STRUCT_RESPONSE_NOT_EXISTED(1702, "Type StructResponseAI not found", HttpStatus.NOT_FOUND),
-    CONTENT_STRUCT_RESPONSE_NOT_NULL(1703, "Type StructResponseAI not found", HttpStatus.NOT_FOUND);
+    CONTENT_STRUCT_RESPONSE_NOT_NULL(1703, "Type StructResponseAI not found", HttpStatus.NOT_FOUND),
+
+    // error code point
+    POINT_NOT_FOUND(10404, "Point not found", HttpStatus.BAD_REQUEST);
 
     Integer code;
     String message;
