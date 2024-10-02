@@ -253,4 +253,9 @@ public class TeacherCalendarServiceImpl implements TeacherCalendar2Service {
 
         return fakeData;
     }
+
+    @Override
+    public List<TeacherCalendar> getEventsBetween(LocalDateTime start, LocalDateTime end) {
+        return teacherCalendarRepository.findByStartTimeBetween(start, end);
+    }
 }

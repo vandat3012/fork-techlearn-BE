@@ -8,6 +8,8 @@ import biweekly.property.Method;
 import biweekly.property.Trigger;
 import biweekly.util.Duration;
 import com.techzen.techlearn.dto.CalendarDTO;
+import com.techzen.techlearn.dto.response.TeacherCalendarResponseDTO2;
+import com.techzen.techlearn.entity.TeacherCalendar;
 import com.techzen.techlearn.service.MailService;
 import jakarta.activation.DataHandler;
 import jakarta.activation.DataSource;
@@ -25,10 +27,13 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,6 +43,10 @@ import java.util.List;
 public class GmailServiceImpl implements MailService {
 
     JavaMailSender javaMailSender;
+
+    private static final String HTML_TEMPLATE_PATH = "/template/event-reminder-template.html";
+
+    private static final String ORGANIZATION_NAME = "TechLearn";
     @Override
     public void sendScheduleSuccessEmail(CalendarDTO calenderDto) throws MessagingException, IOException {
         // Send email
@@ -107,6 +116,34 @@ public class GmailServiceImpl implements MailService {
         }
     }
 
+    @Override
+    public void sendReminder(TeacherCalendar event) throws MessagingException {
+        String subject = "Lời nhắc: " + event.getTitle();
+
+        List<String> attendees = new ArrayList<>();
+        attendees.add(event.getUser().getEmail());
+
+        if (event.getTeacher() != null) {
+            attendees.add(event.getTeacher().getEmail());
+        } else if(event.getMentor() != null) {
+            attendees.add(event.getMentor().getEmail());
+        }
+
+        for (String recipientEmail : attendees) {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            String htmlContent = prepareEmailContent(event, recipientEmail);
+
+            helper.setFrom("thanhtuanle939@gmail.com");
+            helper.setTo(recipientEmail);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+
+            javaMailSender.send(message);
+        }
+    }
+
     private Address[] getToAddress(List<String> attendees) {
         return attendees.stream().map(email -> {
             Address address = null;
@@ -165,5 +202,36 @@ public class GmailServiceImpl implements MailService {
         calenderBody.setHeader("Content-Type", "text/calendar; charset=UTF-8; method=REQUEST");
 
         return calenderBody;
+    }
+
+    private String prepareEmailContent(TeacherCalendar event, String recipientEmail) {
+        String template = loadHtmlTemplate();
+
+        return String.format(template,
+                recipientEmail,
+                event.getTitle(),
+                formatDateTime(event.getStartTime()),
+                formatDateTime(event.getEndTime()),
+                event.getTeacher() != null ? String.format("<p><strong>Giảng viên:</strong> %s</p>", event.getTeacher().getName()) : "",
+                event.getMentor() != null ? String.format("<p><strong>Người hướng dẫn:</strong> %s</p>", event.getMentor().getName()) : "",
+                event.getDescription() != null ? String.format("<p><strong>Mô tả:</strong> %s</p>", event.getDescription()) : "",
+                event.getDescription() != null ? String.format("<p><strong>Link google meet:</strong> %s</p>", event.getDescription()) : "",
+                ORGANIZATION_NAME
+        );
+    }
+
+    private String loadHtmlTemplate() {
+        try (InputStream inputStream = getClass().getResourceAsStream(HTML_TEMPLATE_PATH)) {
+            if (inputStream == null) {
+                throw new IOException("Cannot find template file: " + HTML_TEMPLATE_PATH);
+            }
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load email template", e);
+        }
+    }
+
+    private String formatDateTime(LocalDateTime dateTime) {
+        return dateTime.format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy 'at' h:mm a"));
     }
 }
