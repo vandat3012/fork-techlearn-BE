@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,10 +22,13 @@ import java.util.List;
 public class PointController {
     PointServiceImpl pointService;
 
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping
     public List<PointResponseDTO> findAll() {
         return pointService.findAllPoints();
     }
+
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/{id}")
     public ResponseData<?> getPointsById(@PathVariable Integer id) {
         return ResponseData.builder()
@@ -35,6 +39,7 @@ public class PointController {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseData<?> create(@RequestBody @Valid PointRequestDTO request) {
         return ResponseData.builder()
@@ -45,6 +50,7 @@ public class PointController {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     public ResponseData<?> updateUser(@PathVariable Integer id,@RequestBody PointRequestDTO pointRequestDTO) {
                 return ResponseData.builder()
@@ -55,6 +61,7 @@ public class PointController {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseData<?> deletePoints(@PathVariable Integer id) {
         pointService.deletePointsById(id);
