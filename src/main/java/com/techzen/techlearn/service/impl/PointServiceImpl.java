@@ -2,8 +2,11 @@ package com.techzen.techlearn.service.impl;
 
 import com.techzen.techlearn.dto.request.PointRequestDTO;
 import com.techzen.techlearn.dto.response.MentorResponseDTO;
+import com.techzen.techlearn.dto.response.PageResponse;
 import com.techzen.techlearn.dto.response.PointResponseDTO;
+import com.techzen.techlearn.dto.response.TeacherResponseDTO;
 import com.techzen.techlearn.entity.PointEntity;
+import com.techzen.techlearn.entity.Teacher;
 import com.techzen.techlearn.enums.ErrorCode;
 import com.techzen.techlearn.exception.AppException;
 import com.techzen.techlearn.mapper.PointMapper;
@@ -12,6 +15,9 @@ import com.techzen.techlearn.service.PointService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,10 +37,16 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public List<PointResponseDTO> findAllPoints() {
-        return pointRepository.findAll().stream()
-                .map(pointMapper::toPointResponseDTO)
-                .collect(Collectors.toList());
+    public PageResponse<?> findAllPoints(int page, int pageSize) {
+        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
+        Page<PointEntity> points = pointRepository.findAll(pageable);
+        List<PointResponseDTO> list = points.map(pointMapper::toPointResponseDTO).stream().collect(Collectors.toList());
+        return PageResponse.builder()
+                .page(page)
+                .pageSize(pageSize)
+                .totalPage(points.getTotalPages())
+                .items(list)
+                .build();
     }
 
     @Override

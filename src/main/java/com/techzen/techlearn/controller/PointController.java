@@ -24,8 +24,14 @@ public class PointController {
 
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping
-    public List<PointResponseDTO> findAll() {
-        return pointService.findAllPoints();
+    public ResponseData<?> findAll(@RequestParam(required = false, defaultValue = "1") int page,
+                                   @RequestParam(required = false, defaultValue = "10") int pageSize) {
+        return ResponseData.builder()
+                .status(HttpStatus.OK.value())
+                .code(ErrorCode.GET_SUCCESSFUL.getCode())
+                .message(ErrorCode.GET_SUCCESSFUL.getMessage())
+                .result(pointService.findAllPoints(page, pageSize))
+                .build();
     }
 
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
@@ -52,12 +58,12 @@ public class PointController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseData<?> updateUser(@PathVariable Integer id,@RequestBody PointRequestDTO pointRequestDTO) {
-                return ResponseData.builder()
+    public ResponseData<?> updateUser(@PathVariable Integer id, @RequestBody PointRequestDTO pointRequestDTO) {
+        return ResponseData.builder()
                 .status(HttpStatus.OK.value())
                 .code(ErrorCode.UPDATE_SUCCESSFUL.getCode())
                 .message(ErrorCode.UPDATE_SUCCESSFUL.getMessage())
-                .result(pointService.updatePoint(id,pointRequestDTO))
+                .result(pointService.updatePoint(id, pointRequestDTO))
                 .build();
     }
 
