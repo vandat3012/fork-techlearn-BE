@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -136,9 +137,13 @@ public class TeacherCalendarServiceImpl implements TeacherCalendar2Service {
         if (teacher != null) {
             calendar = teacherCalendarRepository.findByIdAndTeacher(id, teacher)
                     .orElseThrow(() -> new AppException(ErrorCode.CALENDAR_NOT_EXISTED));
+            if (Duration.between(LocalDateTime.now(),calendar.getStartTime()).toMinutes() > 5){
+                calendar.setStatus(CalendarStatus.CANCELLED);
+                teacherCalendarRepository.save(calendar);
+            } else {
+                throw new AppException(ErrorCode.CALENDAR_CAN_NOT_DELETE);
+            }
 
-            calendar.setStatus(CalendarStatus.CANCELLED);
-            teacherCalendarRepository.save(calendar);
         } else if (mentor != null) {
             calendar = teacherCalendarRepository.findByIdAndMentor(id, mentor)
                     .orElseThrow(() -> new AppException(ErrorCode.CALENDAR_NOT_EXISTED));
