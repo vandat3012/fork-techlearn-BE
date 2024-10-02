@@ -1,25 +1,22 @@
 package com.techzen.techlearn.service.impl;
 
-import com.techzen.techlearn.dto.response.*;
-import com.techzen.techlearn.entity.CourseEntity;
-import com.techzen.techlearn.entity.SubmitionEntity;
+import com.techzen.techlearn.client.CourseClient;
+import com.techzen.techlearn.dto.response.CourseResponseDTO;
+import com.techzen.techlearn.dto.response.PageResponse;
+import com.techzen.techlearn.dto.response.TeacherResponseDTO;
+import com.techzen.techlearn.dto.response.UserResponseDTO;
 import com.techzen.techlearn.enums.ErrorCode;
 import com.techzen.techlearn.exception.AppException;
 import com.techzen.techlearn.mapper.CourseMapper;
 import com.techzen.techlearn.mapper.TeacherMapper;
 import com.techzen.techlearn.mapper.UserMapper;
 import com.techzen.techlearn.repository.CourseRepository;
+import com.techzen.techlearn.repository.StudenCourseRepository;
 import com.techzen.techlearn.service.CourseService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 
 import java.util.List;
 import java.util.UUID;
@@ -34,29 +31,30 @@ public class CourseServiceImpl implements CourseService {
     CourseMapper courseMapper;
     UserMapper userMapper;
     TeacherMapper teacherMapper;
+    CourseClient courseClient;
+    StudenCourseRepository studenCourseRepository;
 
     @Override
     public PageResponse<?> getCoursesByUserId(UUID userId, int page, int pageSize) {
-
-        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
-        Page<CourseEntity> reviews =courseRepository.findAllByUserEntitiesId(userId, pageable);
-        List<CourseResponseDTO> list = reviews.stream().map(courseMapper::toCourseResponseDTO).collect(Collectors.toList());
+        var courseIds = studenCourseRepository.findAllCourseIdsByUserId(userId);
+        var courseResponse = courseClient.getCourseByListId(courseIds);
         return PageResponse.builder()
                 .page(page)
                 .pageSize(pageSize)
-                .totalPage(reviews.getTotalPages())
-                .items(list)
+                .totalPage(0)
+                .items(courseResponse.getBody())
                 .build();
     }
 
     @Override
     public CourseResponseDTO findCourseById(long id) {
-        return courseMapper.toCourseResponseDTO(courseRepository.findById(id).orElseThrow(()->new AppException(ErrorCode.COURSE_NOT_FOUND)));
+        return courseMapper.toCourseResponseDTO(courseRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND)));
     }
 
     @Override
     public List<UserResponseDTO> findUserByCourse(long id) {
-        return courseRepository.findById(id).orElseThrow(()->new AppException(ErrorCode.COURSE_NOT_FOUND))
+        return courseRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND))
                 .getUserEntities()
                 .stream()
                 .map(userMapper::toUserResponseDTO)
@@ -65,7 +63,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<TeacherResponseDTO> findTeacherByCourse(long id) {
-        return courseRepository.findById(id).orElseThrow(()->new AppException(ErrorCode.COURSE_NOT_FOUND))
+        return courseRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND))
                 .getTeachers()
                 .stream()
                 .map(teacherMapper::toTeacherResponseDTO)
@@ -74,10 +73,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseResponseDTO findById(long idCourse) {
-        return courseMapper
-                .toCourseResponseDTO(courseRepository
-                        .findById(idCourse)
-                        .orElseThrow(()->new RuntimeException(" COURSE_NOT_FOUND")));
+        return courseMapper.toCourseResponseDTO(courseRepository.findById(idCourse)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND)));
     }
 
 }

@@ -11,12 +11,15 @@ import java.util.UUID;
 
 @Service
 public interface CourseService {
-    public CourseResponseDTO findById(long idCourse);
-    public PageResponse<?> getCoursesByUserId(UUID userId, int page, int pageSize);
+
+    CourseResponseDTO findById(long idCourse);
+
+    PageResponse<?> getCoursesByUserId(UUID userId, int page, int pageSize);
 
     CourseResponseDTO findCourseById(long id);
 
     List<UserResponseDTO> findUserByCourse(long id);
 
-    List<TeacherResponseDTO>  findTeacherByCourse(long id);
+    List<TeacherResponseDTO> findTeacherByCourse(long id);
+
 }

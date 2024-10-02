@@ -1,5 +1,6 @@
 package com.techzen.techlearn.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,11 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MentorResponseDTO {
+    @JsonProperty("Id")
     private String id;
+    @JsonProperty("OwnerText")
     private String name;
-    private String email;
     private String avatar;
+    @JsonProperty("OwnerColor")
     private String color;
-    private boolean isMentor;
-    private boolean isTeacher;
 }

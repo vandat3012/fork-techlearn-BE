@@ -1,7 +1,6 @@
 package com.techzen.techlearn.controller;
 
 import com.techzen.techlearn.dto.request.TeacherRequestDTO;
-import com.techzen.techlearn.dto.request.UserRequestDTO;
 import com.techzen.techlearn.dto.response.ResponseData;
 import com.techzen.techlearn.dto.response.TeacherResponseDTO;
 import com.techzen.techlearn.enums.ErrorCode;
@@ -11,7 +10,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

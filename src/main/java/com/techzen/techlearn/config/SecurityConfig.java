@@ -45,6 +45,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(WHITE_LIST).permitAll()
+                        .requestMatchers("/api/v1/struct-responses/**", "/api/v1/struct-responses"
+                                ,"/api/v1/admin/review-config/**","/api/v1/admin/review-config").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasAuthority(RoleType.ADMIN.name())
                         .anyRequest().permitAll()
                 )

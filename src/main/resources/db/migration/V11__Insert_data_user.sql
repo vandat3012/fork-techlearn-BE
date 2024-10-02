@@ -16,7 +16,7 @@ VALUES (UUID_TO_BIN(UUID()), 'system', NOW(), NOW(), 'system', 'Trần Sương',
        (UUID_TO_BIN(UUID()), 'system', NOW(), NOW(), 'system', 'Tuấn Nguyễn', 28, 'tuanng@gmail.com',
         '$2a$12$hSMTKrTDZjQtNvCJ0xBNdeJenSamThzjYS5k9hAliS/SvYUBk9fxy',
         'https://i.pinimg.com/564x/35/0e/5b/350e5b98dfecb7e6149ad545ad307617.jpg', 0, 0, 1),
-       (UUID_TO_BIN(UUID()), 'system', NOW(), NOW(), 'system', 'Vi Trần', 19, 'vtran123@gmail.com',
+       (UUID_TO_BIN(UUID()), 'system', NOW(), NOW(), 'system', 'Vi Trần', 19, 'tieuvi200904@gmail.com',
         '$2a$12$hSMTKrTDZjQtNvCJ0xBNdeJenSamThzjYS5k9hAliS/SvYUBk9fxy',
         'https://i.pinimg.com/564x/42/ce/fe/42cefe9ed9388b1feed1773e67aeba17.jpg', 0, 0, 0),
        (UUID_TO_BIN(UUID()), 'system', NOW(), NOW(), 'system', 'Đạt Phan', 32, 'datphan1@gmail.com',
@@ -44,7 +44,7 @@ SET @user3_id = (SELECT id
 
 SET @user4_id = (SELECT id
                  FROM tbl_user
-                 WHERE email = 'vtran123@gmail.com');
+                 WHERE email = 'tieuvi200904@gmail.com');
 
 INSERT INTO tbl_user_roles (user, role)
 VALUES (@user1_id, 3),

@@ -30,6 +30,15 @@ public class ReviewConfigServiceImpl implements ReviewConfigService {
     ReviewConfigRepository reviewConfigRepository;
     ReviewConfigMapper reviewConfigMapper;
 
+
+
+    @Override
+    public ReviewConfigResponseDTO getByActive() {
+
+        return reviewConfigMapper.toReviewConfigResponseDTO(reviewConfigRepository.findByActive());
+    }
+
+
     @Override
     public ReviewConfigResponseDTO saveConfig(ReviewConfigRequestDTO config) {
         ReviewConfigEntity reviewConfig = reviewConfigMapper.toReviewConfigEntity(config);
