@@ -207,4 +207,9 @@ public class TeacherCalendarServiceImpl implements TeacherCalendar2Service {
                 .stream().map(teacherCalendarMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<TeacherCalendar> getEventsBetween(LocalDateTime start, LocalDateTime end) {
+        return teacherCalendarRepository.findByStartTimeBetween(start, end);
+    }
 }
