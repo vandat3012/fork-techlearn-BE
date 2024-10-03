@@ -20,6 +20,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -132,11 +133,13 @@ public class StudentCalendarServiceImpl implements StudentCalendarService {
         Mentor mentor = calendar.getMentor();
 
         UserEntity user = null;
-        if (calendar.getStatus().equals(CalendarStatus.BOOKED)){
+        if (calendar.getStatus().equals(CalendarStatus.BOOKED) & Duration.between(LocalDateTime.now(),calendar.getStartTime()).toMinutes() > 5){
             calendar.setStatus(CalendarStatus.CANCELLED);
             user = calendar.getUser();
             user.setPoints(user.getPoints() + 1);
             userRepository.save(user);
+        } else {
+            throw new AppException(ErrorCode.CALENDAR_CAN_NOT_DELETE);
         }
 
         List<String> recipientEmails = new ArrayList<>();
