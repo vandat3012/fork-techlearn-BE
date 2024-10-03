@@ -27,7 +27,7 @@ public class EmailReminderTask {
 
     ConcurrentHashMap<Integer, LocalDateTime> reminderCache = new ConcurrentHashMap<>();
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 300000)
     public void sendReminderEmails() throws MessagingException {
 
         LocalDateTime now = LocalDateTime.now();
