@@ -9,6 +9,7 @@ import com.techzen.techlearn.enums.ErrorCode;
 import com.techzen.techlearn.exception.AppException;
 import com.techzen.techlearn.mapper.TeacherCalendarMapper;
 import com.techzen.techlearn.repository.*;
+import com.techzen.techlearn.service.GoogleMeetService;
 import com.techzen.techlearn.service.MailService;
 import com.techzen.techlearn.service.StudentCalendarService;
 import jakarta.mail.MessagingException;
@@ -20,6 +21,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,7 +43,7 @@ public class StudentCalendarServiceImpl implements StudentCalendarService {
     MailService gmailService;
     TeacherRepository teacherRepository;
     MentorRepository mentorRepository;
-
+    GoogleMeetService googleMeetService;
 
     private boolean isTeacher(UUID id) {
         return teacherRepository.existsById(id);
@@ -53,7 +55,7 @@ public class StudentCalendarServiceImpl implements StudentCalendarService {
 
     @Transactional
     @Override
-    public TeacherCalendarResponseDTO2 addStudentCalendar(TeacherCalendarRequestDTO2 request) throws MessagingException, IOException {
+    public TeacherCalendarResponseDTO2 addStudentCalendar(TeacherCalendarRequestDTO2 request) throws MessagingException, IOException, GeneralSecurityException {
 
         LocalDate dateStart = LocalDate.parse(request.getStartTime().substring(0, 10));
         LocalDate dateEnd = LocalDate.parse(request.getEndTime().substring(0, 10));
@@ -109,18 +111,25 @@ public class StudentCalendarServiceImpl implements StudentCalendarService {
         user.setPoints(user.getPoints() - 1);
         calendar.setUser(user);
 
+        calendar.setMeetingUrl(createGoogleMeetUrl(calendar));
+
         // send email
         gmailService.sendEmails(
                 recipientEmails,
                 "Lịch đặt mới",
                 calendar.getTitle(),
-                "#",
+                calendar.getMeetingUrl(),
                 "Tham gia cuộc họp",
                 "#3498db",  // Màu xanh
                 calendar
         );
 
         return teacherCalendarMapper.toDTO(teacherCalendarRepository.save(calendar));
+    }
+
+    private String createGoogleMeetUrl(TeacherCalendar teacherCalendar) throws GeneralSecurityException, IOException {
+
+        return googleMeetService.createGoogleMeetEvent(teacherCalendar);
     }
 
     @Override

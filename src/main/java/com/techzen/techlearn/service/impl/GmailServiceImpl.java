@@ -263,7 +263,7 @@ public class GmailServiceImpl implements MailService {
                 event.getTeacher() != null ? String.format("<p><strong>Giảng viên:</strong> %s</p>", event.getTeacher().getName()) : "",
                 event.getMentor() != null ? String.format("<p><strong>Người hướng dẫn:</strong> %s</p>", event.getMentor().getName()) : "",
                 event.getDescription() != null ? String.format("<p><strong>Mô tả:</strong> %s</p>", event.getDescription()) : "",
-                event.getDescription() != null ? String.format("<p><strong>Link google meet:</strong> %s</p>", event.getDescription()) : "",
+                event.getMeetingUrl() != null ? String.format("<p><strong>Link google meet:</strong> %s</p>", event.getMeetingUrl()) : "",
                 ORGANIZATION_NAME
         );
     }
