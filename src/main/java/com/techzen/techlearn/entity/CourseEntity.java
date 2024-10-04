@@ -38,6 +38,9 @@ public class CourseEntity extends BaseEntity{
     @Column(name = "points")
     private Integer points;
 
+    @Column(name = "private_point")
+    private Integer privatePoint;
+
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
