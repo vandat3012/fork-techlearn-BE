@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -117,46 +118,54 @@ public class UserServiceImpl implements UserService {
 //
 //    }
 
-    @Override
-    public UserResponseDTO retrieveUser() {
+
+@Override
+public UserResponseDTO retrieveUser() {
+    var context = SecurityContextHolder.getContext();
+    String email = context.getAuthentication().getName();
+
+    UserEntity user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+    UserResponseDTO userResponseDTO = userMapper.toUserResponseDTO(user);
+
+    if (user.isMentor()) {
+        Mentor mentor = mentorRepository.findByEmail(user.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.MENTOR_NOT_EXISTED));
+        List<ChapterEntity> chapters = mentor.getChapters();
+        userResponseDTO.setChapters(chapters);
+    }
+
+    if (user.isTeacher()) {
+        Teacher teacher = teacherRepository.findByEmail(user.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
+        List<CourseEntity> courses = teacher.getCourses();
+        userResponseDTO.setCourses(courses);
+    }
+
+    if (!user.isMentor() && !user.isTeacher()) {
+        List<CourseEntity> userCourses = user.getCourseEntities();
+        userResponseDTO.setCourses(userCourses);
+    }
+
+    return userResponseDTO;
+}
+
+    public UserResponseDTO updateUserMe(UserResponseDTO userResponseDTO) {
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName();
 
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        UserResponseDTO userResponseDTO = userMapper.toUserResponseDTO(user);
-        if (user.isMentor()) {
-            Mentor mentor = mentorRepository.findByEmail(user.getEmail())
-                    .orElseThrow(() -> new AppException(ErrorCode.MENTOR_NOT_EXISTED));
 
-            List<String> chapterNames = mentor.getChapters().stream()
-                    .map(ChapterEntity::getName)
-                    .collect(Collectors.toList());
+        user.setFullName(userResponseDTO.getFullName());
+        user.setAge(userResponseDTO.getAge());
+        user.setEmail(userResponseDTO.getEmail());
+        user.setPoints(userResponseDTO.getPoints());
+        user.setAvatar(userResponseDTO.getAvatar());
 
-            userResponseDTO.setChapterName(String.join(", ", chapterNames));
-
-//            List<String> courseNames = mentor.getChapters().stream()
-//                    .map(chapter -> chapter.getCourse().getName())
-//                    .collect(Collectors.toList());
-//            userResponseDTO.setCourseName(String.join(", ", courseNames));
-        }
-
-        if (user.isTeacher()) {
-            Teacher teacher = teacherRepository.findByEmail(user.getEmail())
-                    .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
-            List<String> teacherCourseNames = teacher.getCourses().stream()
-                    .map(CourseEntity::getName)
-                    .collect(Collectors.toList());
-            userResponseDTO.setCourseName(String.join(", ", teacherCourseNames));
-        }
-        if (!user.isMentor() && !user.isTeacher()) {
-            List<String> userCourseNames = user.getCourseEntities().stream()
-                    .map(CourseEntity::getName)
-                    .collect(Collectors.toList());
-
-            userResponseDTO.setCourseName(String.join(", ", userCourseNames));
-        }
-        return userResponseDTO;
+        userRepository.save(user);
+        return userMapper.toUserResponseDTO(user);
     }
 
     @Override
@@ -186,4 +195,6 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.toUserResponseDTO(userRepository.save(user));
     }
+
+
 }
