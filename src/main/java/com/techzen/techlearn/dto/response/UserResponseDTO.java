@@ -11,6 +11,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,6 +31,7 @@ public class UserResponseDTO implements Serializable {
     @JsonProperty("isTeacher")
     boolean isTeacher;
     Set<Role> roles;
-    String chapterName;
-    String courseName;
+    List<ChapterEntity> chapters;
+    List<CourseEntity> courses;
+
 }
