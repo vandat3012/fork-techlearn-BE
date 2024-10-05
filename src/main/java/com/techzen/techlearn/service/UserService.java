@@ -33,4 +33,6 @@ public interface UserService {
     StudentCourseResponseDTO getAllPointsById (UUID idUser);
 
     UserResponseDTO removeRoles(UUID id, List<RoleType> roles);
+
+    UserResponseDTO updateUserMe(UserResponseDTO userResponseDTO);
 }

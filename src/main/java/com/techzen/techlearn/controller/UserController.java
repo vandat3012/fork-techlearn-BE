@@ -3,6 +3,7 @@ package com.techzen.techlearn.controller;
 import com.techzen.techlearn.dto.request.RoleRequest;
 import com.techzen.techlearn.dto.request.UserRequestDTO;
 import com.techzen.techlearn.dto.response.ResponseData;
+import com.techzen.techlearn.dto.response.UserResponseDTO;
 import com.techzen.techlearn.enums.ErrorCode;
 import com.techzen.techlearn.service.MailService;
 import com.techzen.techlearn.service.UserService;
@@ -113,6 +114,17 @@ public class UserController {
                 .code(ErrorCode.GET_SUCCESSFUL.getCode())
                 .message(ErrorCode.GET_SUCCESSFUL.getMessage())
                 .result(userService.retrieveUser())
+                .build();
+    }
+    @PutMapping("/me")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER') or hasAuthority('USER') or hasAuthority('MENTOR')")
+    public ResponseData<?> updateUserMe(@RequestBody UserResponseDTO userResponseDTO) {
+        UserResponseDTO updatedUser = userService.updateUserMe(userResponseDTO);
+        return ResponseData.builder()
+                .status(HttpStatus.OK.value())
+                .code(ErrorCode.UPDATE_SUCCESSFUL.getCode())
+                .message(ErrorCode.UPDATE_SUCCESSFUL.getMessage())
+                .result(updatedUser)
                 .build();
     }
 
