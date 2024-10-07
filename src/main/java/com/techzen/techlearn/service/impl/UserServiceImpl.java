@@ -1,9 +1,8 @@
 package com.techzen.techlearn.service.impl;
 
+import com.techzen.techlearn.client.PointClient;
 import com.techzen.techlearn.dto.request.UserRequestDTO;
-import com.techzen.techlearn.dto.response.PageResponse;
-import com.techzen.techlearn.dto.response.StudentCourseResponseDTO;
-import com.techzen.techlearn.dto.response.UserResponseDTO;
+import com.techzen.techlearn.dto.response.*;
 import com.techzen.techlearn.entity.Role;
 import com.techzen.techlearn.entity.UserEntity;
 import com.techzen.techlearn.enums.ErrorCode;
@@ -12,13 +11,17 @@ import com.techzen.techlearn.exception.AppException;
 import com.techzen.techlearn.mapper.UserMapper;
 import com.techzen.techlearn.repository.RoleRepository;
 import com.techzen.techlearn.repository.UserRepository;
+import com.techzen.techlearn.service.MailService;
 import com.techzen.techlearn.service.UserService;
+import jakarta.mail.MessagingException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +37,8 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     RoleRepository roleRepository;
+    MailService gmaMailService;
+    PointClient pointClient;
 
     @Override
     public UserResponseDTO getUserById(UUID id) {
@@ -138,5 +143,24 @@ public class UserServiceImpl implements UserService {
         });
 
         return userMapper.toUserResponseDTO(userRepository.save(user));
+    }
+
+    @Override
+    public PointResponseDTO requestPointsPurchase(PointResponseDTO dto) throws MessagingException {
+        UserResponseDTO user = retrieveUser();
+
+        gmaMailService.sendMailSupportPoints(dto, user);
+
+        return dto;
+    }
+
+    @Override
+    public PageResponse<?> findAllPointsPackage(int page, int pageSize) {
+        var response = pointClient.findAllPointsPackage(page, pageSize);
+        return PageResponse.builder()
+                .page(page)
+                .pageSize(pageSize)
+                .items(response.getBody())
+                .build();
     }
 }
