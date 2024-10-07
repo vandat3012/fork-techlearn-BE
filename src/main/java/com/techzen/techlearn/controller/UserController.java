@@ -2,11 +2,14 @@ package com.techzen.techlearn.controller;
 
 import com.techzen.techlearn.dto.request.RoleRequest;
 import com.techzen.techlearn.dto.request.UserRequestDTO;
+import com.techzen.techlearn.dto.response.PageResponse;
+import com.techzen.techlearn.dto.response.PointResponseDTO;
 import com.techzen.techlearn.dto.response.ResponseData;
 import com.techzen.techlearn.dto.response.UserResponseDTO;
 import com.techzen.techlearn.enums.ErrorCode;
 import com.techzen.techlearn.service.MailService;
 import com.techzen.techlearn.service.UserService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +42,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER') or (hasAuthority('USER') and #id == principal.id)")
+//    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER') or (hasAuthority('USER') and #id == principal.id)")
     public ResponseData<?> getUserById(@PathVariable UUID id) {
         return ResponseData.builder()
                 .status(HttpStatus.OK.value())
@@ -136,6 +139,24 @@ public class UserController {
                 .code(ErrorCode.GET_SUCCESSFUL.getCode())
                 .message(ErrorCode.GET_SUCCESSFUL.getMessage())
                 .result(userService.getAllPointsById(idUser))
+                .build();
+    }
+
+    @GetMapping("/points-package")
+    @PreAuthorize("hasAuthority('USER')")
+    public PageResponse<?> findAllPointsPackage (@RequestParam(required = false, defaultValue = "1") int page,
+                                                 @RequestParam(required = false, defaultValue = "10") int pageSize) {
+        return userService.findAllPointsPackage(page, pageSize);
+    }
+
+    @PostMapping("/request-points")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseData<?> requestPointsPurchase (@RequestBody PointResponseDTO dto) throws MessagingException {
+        return ResponseData.builder()
+                .status(HttpStatus.OK.value())
+                .code(ErrorCode.GET_SUCCESSFUL.getCode())
+                .message(ErrorCode.GET_SUCCESSFUL.getMessage())
+                .result(userService.requestPointsPurchase(dto))
                 .build();
     }
 }
