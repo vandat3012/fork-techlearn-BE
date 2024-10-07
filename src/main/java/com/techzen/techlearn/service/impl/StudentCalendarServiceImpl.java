@@ -111,7 +111,7 @@ public class StudentCalendarServiceImpl implements StudentCalendarService {
         user.setPoints(user.getPoints() - 1);
         calendar.setUser(user);
 
-        calendar.setMeetingUrl(createGoogleMeetUrl(calendar));
+        calendar.setMeetingUrl(createGoogleMeetUrl(calendar, recipientEmails));
 
         // send email
         gmailService.sendEmails(
@@ -127,9 +127,9 @@ public class StudentCalendarServiceImpl implements StudentCalendarService {
         return teacherCalendarMapper.toDTO(teacherCalendarRepository.save(calendar));
     }
 
-    private String createGoogleMeetUrl(TeacherCalendar teacherCalendar) throws GeneralSecurityException, IOException {
+    private String createGoogleMeetUrl(TeacherCalendar teacherCalendar, List<String> recipientEmails) throws GeneralSecurityException, IOException {
 
-        return googleMeetService.createGoogleMeetEvent(teacherCalendar);
+        return googleMeetService.createGoogleMeetEvent(teacherCalendar, recipientEmails);
     }
 
     @Override
