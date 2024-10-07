@@ -37,4 +37,6 @@ public interface UserService {
     PointResponseDTO requestPointsPurchase(PointResponseDTO dto) throws MessagingException;
 
     PageResponse<?> findAllPointsPackage(int page, int pageSize);
+  
+    UserResponseDTO updateUserMe(UserResponseDTO userResponseDTO);
 }

@@ -5,11 +5,17 @@ import com.techzen.techlearn.dto.request.UserRequestDTO;
 import com.techzen.techlearn.dto.response.*;
 import com.techzen.techlearn.entity.Role;
 import com.techzen.techlearn.entity.UserEntity;
+import com.techzen.techlearn.dto.response.PageResponse;
+import com.techzen.techlearn.dto.response.StudentCourseResponseDTO;
+import com.techzen.techlearn.dto.response.UserResponseDTO;
+import com.techzen.techlearn.entity.*;
 import com.techzen.techlearn.enums.ErrorCode;
 import com.techzen.techlearn.enums.RoleType;
 import com.techzen.techlearn.exception.AppException;
 import com.techzen.techlearn.mapper.UserMapper;
+import com.techzen.techlearn.repository.MentorRepository;
 import com.techzen.techlearn.repository.RoleRepository;
+import com.techzen.techlearn.repository.TeacherRepository;
 import com.techzen.techlearn.repository.UserRepository;
 import com.techzen.techlearn.service.MailService;
 import com.techzen.techlearn.service.UserService;
@@ -26,8 +32,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +47,8 @@ public class UserServiceImpl implements UserService {
     RoleRepository roleRepository;
     MailService gmaMailService;
     PointClient pointClient;
+    MentorRepository mentorRepository;
+    TeacherRepository teacherRepository;
 
     @Override
     public UserResponseDTO getUserById(UUID id) {
@@ -106,15 +116,66 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponseDTO(userRepository.save(user));
     }
 
-    @Override
-    public UserResponseDTO retrieveUser() {
-       var context = SecurityContextHolder.getContext();
-       String email = context.getAuthentication().getName();
+//    @Override
+//    public UserResponseDTO retrieveUser() {
+//       var context = SecurityContextHolder.getContext();
+//       String email = context.getAuthentication().getName();
+//
+//       UserEntity user = userRepository.findByEmail(email)
+//               .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+//
+//       return userMapper.toUserResponseDTO(user);
+//
+//    }
 
-       UserEntity user = userRepository.findByEmail(email)
-               .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-       return userMapper.toUserResponseDTO(user);
+@Override
+public UserResponseDTO retrieveUser() {
+    var context = SecurityContextHolder.getContext();
+    String email = context.getAuthentication().getName();
+
+    UserEntity user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+    UserResponseDTO userResponseDTO = userMapper.toUserResponseDTO(user);
+
+    if (user.isMentor()) {
+        Mentor mentor = mentorRepository.findByEmail(user.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.MENTOR_NOT_EXISTED));
+        List<ChapterEntity> chapters = mentor.getChapters();
+        userResponseDTO.setChapters(chapters);
+    }
+
+    if (user.isTeacher()) {
+        Teacher teacher = teacherRepository.findByEmail(user.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
+        List<CourseEntity> courses = teacher.getCourses();
+        userResponseDTO.setCourses(courses);
+    }
+
+    if (!user.isMentor() && !user.isTeacher()) {
+        List<CourseEntity> userCourses = user.getCourseEntities();
+        userResponseDTO.setCourses(userCourses);
+    }
+
+    return userResponseDTO;
+}
+
+    public UserResponseDTO updateUserMe(UserResponseDTO userResponseDTO) {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        user.setFullName(userResponseDTO.getFullName());
+        user.setAge(userResponseDTO.getAge());
+        user.setEmail(userResponseDTO.getEmail());
+        user.setPoints(userResponseDTO.getPoints());
+        user.setAvatar(userResponseDTO.getAvatar());
+
+        userRepository.save(user);
+        return userMapper.toUserResponseDTO(user);
     }
 
     @Override
@@ -163,4 +224,5 @@ public class UserServiceImpl implements UserService {
                 .items(response.getBody())
                 .build();
     }
+
 }
