@@ -8,7 +8,10 @@ import biweekly.property.Method;
 import biweekly.property.Trigger;
 import biweekly.util.Duration;
 import com.techzen.techlearn.dto.CalendarDTO;
+import com.techzen.techlearn.dto.response.PointResponseDTO;
+import com.techzen.techlearn.dto.response.UserResponseDTO;
 import com.techzen.techlearn.entity.TeacherCalendar;
+import com.techzen.techlearn.entity.UserEntity;
 import com.techzen.techlearn.service.MailService;
 import jakarta.activation.DataHandler;
 import jakarta.activation.DataSource;
@@ -42,9 +45,11 @@ import java.util.List;
 public class GmailServiceImpl implements MailService {
 
     JavaMailSender javaMailSender;
-    private static final String HTML_TEMPLATE_PATH = "/template/event-reminder-template.html";
+    private static final String REMINDER_HTML_MAIL_TEMPLATE_PATH = "/template/event-reminder-template.html";
+    private static final String SUPPORT_POINTS_MAIL_TEMPLATE_PATH = "/template/support-points-template.html";
 
     private static final String ORGANIZATION_NAME = "TechLearn";
+    private static final String MANAGER_EMAIL = "thanhtuanle939@gmail.com";
 
     @Override
     public void sendScheduleSuccessEmail(CalendarDTO calenderDto) throws MessagingException, IOException {
@@ -181,9 +186,29 @@ public class GmailServiceImpl implements MailService {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            String htmlContent = prepareEmailContent(event, recipientEmail);
+            String htmlContent = prepareReminderEmailContent(event, recipientEmail);
 
-            helper.setFrom("thanhtuanle939@gmail.com");
+            helper.setFrom(MANAGER_EMAIL);
+            helper.setTo(recipientEmail);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+
+            javaMailSender.send(message);
+        }
+    }
+
+    @Override
+    public void sendMailSupportPoints(PointResponseDTO point, UserResponseDTO user) throws MessagingException {
+        String subject = "Thông báo mua gói hỗ trợ điểm";
+        List<String> recipients = List.of(user.getEmail(), MANAGER_EMAIL);
+
+        for (String recipientEmail : recipients) {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            String htmlContent = prepareSupportPointsEmailContent(point, user, recipientEmail);
+
+            helper.setFrom(MANAGER_EMAIL);
             helper.setTo(recipientEmail);
             helper.setSubject(subject);
             helper.setText(htmlContent, true);
@@ -252,8 +277,8 @@ public class GmailServiceImpl implements MailService {
         return calenderBody;
     }
 
-    private String prepareEmailContent(TeacherCalendar event, String recipientEmail) {
-        String template = loadHtmlTemplate();
+    private String prepareReminderEmailContent(TeacherCalendar event, String recipientEmail) {
+        String template = loadHtmlTemplate(REMINDER_HTML_MAIL_TEMPLATE_PATH);
 
         return String.format(template,
                 recipientEmail,
@@ -268,10 +293,41 @@ public class GmailServiceImpl implements MailService {
         );
     }
 
-    private String loadHtmlTemplate() {
-        try (InputStream inputStream = getClass().getResourceAsStream(HTML_TEMPLATE_PATH)) {
+    private String prepareSupportPointsEmailContent(PointResponseDTO point, UserResponseDTO user, String managerEmail) {
+        String template = loadHtmlTemplate(SUPPORT_POINTS_MAIL_TEMPLATE_PATH);
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+
+        if(managerEmail.equals("thanhtuanle939@gmail.com")) {
+            return String.format(
+                    template,
+                    managerEmail,
+                    "Có yêu cầu mua gói hỗ trợ điểm",
+                    user.getFullName(),
+                    point.getPoints(),
+                    point.getPrice(),
+                    dtf.format(now),
+                    ORGANIZATION_NAME
+            );
+        }
+
+        return String.format(
+                template,
+                user.getEmail(),
+                "Cảm ơn bạn đã mua điểm hỗ trợ. Dưới đây là chi tiết giao dịch của bạn:",
+                user.getFullName(),
+                point.getPoints(),
+                point.getPrice(),
+                dtf.format(now),
+                ORGANIZATION_NAME
+        );
+    }
+
+    private String loadHtmlTemplate(String path) {
+        try (InputStream inputStream = getClass().getResourceAsStream(path)) {
             if (inputStream == null) {
-                throw new IOException("Cannot find template file: " + HTML_TEMPLATE_PATH);
+                throw new IOException("Cannot find template file: " + path);
             }
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
