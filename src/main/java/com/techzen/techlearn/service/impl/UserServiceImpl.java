@@ -20,6 +20,7 @@ import com.techzen.techlearn.repository.UserRepository;
 import com.techzen.techlearn.service.MailService;
 import com.techzen.techlearn.service.UserService;
 import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -222,15 +223,19 @@ public UserResponseDTO retrieveUser() {
     @Override
     public PointResponseDTO requestPointsPurchase(PointResponseDTO dto) throws MessagingException {
         UserResponseDTO user = retrieveUser();
-
+        UserEntity existingUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Người dùng không tồn tại với ID: " + dto.getId()));
+        existingUser.setPoints(existingUser.getPoints() + Integer.parseInt(dto.getPoints()));
+        userRepository.save(existingUser);
         gmaMailService.sendMailSupportPoints(dto, user);
-
         return dto;
     }
+
 
     @Override
     public PageResponse<?> findAllPointsPackage(int page, int pageSize) {
         var response = pointClient.findAllPointsPackage(page, pageSize);
+        System.out.println(response);
         return PageResponse.builder()
                 .page(page)
                 .pageSize(pageSize)
