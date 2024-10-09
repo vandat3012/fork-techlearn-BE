@@ -224,7 +224,7 @@ public UserResponseDTO retrieveUser() {
     public PointResponseDTO requestPointsPurchase(PointResponseDTO dto) throws MessagingException {
         UserResponseDTO user = retrieveUser();
         UserEntity existingUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Người dùng không tồn tại với ID: " + dto.getId()));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         existingUser.setPoints(existingUser.getPoints() + Integer.parseInt(dto.getPoints()));
         userRepository.save(existingUser);
         gmaMailService.sendMailSupportPoints(dto, user);
@@ -235,7 +235,6 @@ public UserResponseDTO retrieveUser() {
     @Override
     public PageResponse<?> findAllPointsPackage(int page, int pageSize) {
         var response = pointClient.findAllPointsPackage(page, pageSize);
-        System.out.println(response);
         return PageResponse.builder()
                 .page(page)
                 .pageSize(pageSize)
